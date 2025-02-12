@@ -60,8 +60,8 @@ def cadastrar_empresa(nome, cnpj, endereco, telefone, email, senha):
     finally:
         conn.close()  # Fecha a conexão com o banco de dados
 
-# Interface gráfica
-def main(page: ft.Page):
+# Função para criar a tela de cadastro
+def tela_cadastro(page: ft.Page):
     # Configurações da página
     page.title = "Sistema Contábil"
     page.theme_mode = ft.ThemeMode.LIGHT  # Tema claro
@@ -212,6 +212,3 @@ def main(page: ft.Page):
 
 # Cria as tabelas no banco de dados (se não existirem)
 criar_tabelas()
-
-# Inicia o aplicativo
-ft.app(target=main)
