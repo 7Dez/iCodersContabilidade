@@ -7,6 +7,7 @@ def home_view(page: ft.Page):
     page.title = "Home - Sistema Contábil"
     page.vertical_alignment = ft.MainAxisAlignment.CENTER
     page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
+    page.window.maximized = True
 
     # Título da Home
     title = ft.Text("Bem-vindo ao Sistema Contábil", size=30, weight=ft.FontWeight.BOLD, color=ft.colors.BLUE_800)
@@ -151,14 +152,7 @@ def dashboard_menu(page: ft.Page):
     page.appbar = app_bar
     page.add(menu_buttons)
 
-# Função para o Dashboard (exemplo de outra tela)
-def dashboard_view(page: ft.Page):
-    page.title = "Dashboard - Sistema Contábil"
-    page.vertical_alignment = ft.MainAxisAlignment.CENTER
-    page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
 
-    # Exemplo de conteúdo do Dashboard
-    page.add(ft.Text("Dashboard", size=30, weight=ft.FontWeight.BOLD))
 
 # Executa o aplicativo
 if __name__ == "__main__":
