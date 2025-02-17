@@ -1,6 +1,9 @@
 import flet as ft
 from cadastro_empresa import tela_cadastro
 from dashboard import dashboard_view
+from contas_pagar import contas_pagar_view
+from contas_receber import contas_receber_view
+
 
 # Função para a página inicial (Home)
 def home_view(page: ft.Page):
@@ -55,12 +58,12 @@ def dashboard_menu(page: ft.Page):
     # Função para navegar para a página de Contas a Pagar
     def go_to_contas_pagar(e):
         page.clean()  # Limpa a página
-        page.add(ft.Text("Adicionar Contas a Pagar", size=30, weight=ft.FontWeight.BOLD))
+        contas_pagar_view(page)
 
     # Função para navegar para a página de Contas a Receber
     def go_to_contas_receber(e):
         page.clean()  # Limpa a página
-        page.add(ft.Text("Adicionar Contas a Receber", size=30, weight=ft.FontWeight.BOLD))
+        contas_receber_view(page)
 
     # Função para navegar para a página de Dashboard
     def go_to_dashboard(e):
