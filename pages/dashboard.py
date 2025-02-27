@@ -1,4 +1,5 @@
 import flet as ft
+import sqlite3
 from busca_empresa import criar_busca_empresa  # Importando o componente de busca
 
 def dashboard_view(page: ft.Page):
@@ -14,12 +15,36 @@ def dashboard_view(page: ft.Page):
     def on_select_empresa(empresa):
         nonlocal empresa_selecionada
         empresa_selecionada = empresa
-        page.snack_bar = ft.SnackBar(
-            ft.Text(f"Empresa selecionada: {empresa['nome']}"),
-            bgcolor=ft.colors.GREEN,
-        )
-        page.snack_bar.open = True
-        page.update()
+
+        # Conectar ao banco de dados e buscar os dados da empresa
+        conn = sqlite3.connect('sistema_contabil.db')
+        cursor = conn.cursor()
+        cursor.execute("SELECT nome, cnpj, endereco, telefone FROM empresas WHERE nome = ?", (empresa['nome'],))
+        dados_empresa = cursor.fetchone()
+        conn.close()
+
+        if dados_empresa:
+            # Atualizar os dados no container
+            container_empresa.content.controls[0].value = dados_empresa[0]  # Nome da Empresa
+            container_empresa.content.controls[2].value = f"CNPJ: {dados_empresa[1]}"  # CNPJ
+            container_empresa.content.controls[3].value = f"Telefone: {dados_empresa[3]}"  # Telefone
+            container_empresa.content.controls[4].value = f"Endereço: {dados_empresa[2]}"  # Endereço
+
+            # Mostrar mensagem de sucesso
+            page.snack_bar = ft.SnackBar(
+                ft.Text(f"Empresa selecionada: {empresa['nome']}"),
+                bgcolor=ft.colors.GREEN,
+            )
+            page.snack_bar.open = True
+            page.update()
+        else:
+            # Mostrar mensagem de erro se a empresa não for encontrada
+            page.snack_bar = ft.SnackBar(
+                ft.Text(f"Empresa não encontrada: {empresa['nome']}"),
+                bgcolor=ft.colors.RED,
+            )
+            page.snack_bar.open = True
+            page.update()
 
     # Componente de busca de empresa
     busca_empresa = criar_busca_empresa(on_select_empresa)
@@ -76,27 +101,29 @@ def dashboard_view(page: ft.Page):
         height=100,
     )
 
+    # Container para os dados da empresa
+    container_empresa = ft.Container(
+        bgcolor=ft.colors.BLUE_100,
+        padding=ft.padding.all(20),
+        border_radius=15,
+        height=500,
+        width=300,
+        content=ft.Column(
+            controls=[
+                ft.Text(value='Nome da Empresa', size=20, color=ft.colors.BLUE_800),
+                ft.Divider(color=ft.colors.BLUE_800),
+                ft.Text(value='CNPJ', size=15, color=ft.colors.BLUE_800),
+                ft.Text(value='Telefone', size=15, color=ft.colors.BLUE_800),
+                ft.Text(value='Endereço', size=15, color=ft.colors.BLUE_800),
+            ]
+        )
+    )
+
     container_principal = ft.Container(
         width=1500,
         content=ft.Row(
             controls=[
-                ft.Container(
-                    bgcolor=ft.colors.BLUE_100,
-                    padding=ft.padding.all(20),
-                    border_radius=15,
-                    height=500,
-                    width=300,
-                    content=ft.Column(
-                        controls=[
-                            ft.Text(value='Nome da Empresa', size=20, color=ft.colors.BLUE_800),
-                            ft.Divider(color=ft.colors.BLUE_800),
-                            ft.Text(value='Dados Cadastrais', size=15, color=ft.colors.BLUE_800),
-                            ft.Text(value='CNPJ', size=15, color=ft.colors.BLUE_800),
-                            ft.Text(value='Telefone', size=15, color=ft.colors.BLUE_800),
-                            ft.Text(value='Email', size=15, color=ft.colors.BLUE_800),
-                        ]
-                    )
-                ),
+                container_empresa,
                 ft.Container(
                     bgcolor=ft.colors.BLUE_100,
                     padding=ft.padding.all(20),
