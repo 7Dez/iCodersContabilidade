@@ -2,6 +2,30 @@ import flet as ft
 from datetime import datetime
 from busca_empresa import criar_busca_empresa  # Importando o componente de busca
 
+import sqlite3
+
+# Conectar ao banco de dados (ou criar se não existir)
+conn = sqlite3.connect('sistema_contabil.db')
+cursor = conn.cursor()
+
+# Criar a tabela contas_pagar
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS contas_pagar (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_empresa INTEGER NOT NULL,
+    descricao TEXT NOT NULL,
+    valor REAL NOT NULL,
+    data_vencimento DATE NOT NULL,
+    categoria TEXT NOT NULL,
+    status TEXT NOT NULL,
+    FOREIGN KEY (id_empresa) REFERENCES empresas(id)
+)
+''')
+
+# Commit e fechar a conexão
+conn.commit()
+conn.close()
+
 # Função para a tela de Contas a Pagar
 def contas_pagar_view(page: ft.Page):
     page.title = "Contas a Pagar - Sistema Contábil"
@@ -27,6 +51,17 @@ def contas_pagar_view(page: ft.Page):
     # Componente de busca de empresa
     busca_empresa = criar_busca_empresa(on_select_empresa)
 
+    # Diálogo de sucesso
+    dialog_sucesso = ft.AlertDialog(
+        title=ft.Text("Sucesso!"),
+        content=ft.Text("Conta adicionada com sucesso."),
+        on_dismiss=lambda e: print("Diálogo fechado"),
+    )
+   
+
+    def abrir_dialog_sucesso():
+        print("Tentando abrir o diálogo de sucesso...")  # Debug
+        page.open(dialog_sucesso)  # Abre o diálogo corretamente
     # Função para adicionar uma nova conta
     def adicionar_conta(e):
         if not empresa_selecionada:
@@ -46,13 +81,32 @@ def contas_pagar_view(page: ft.Page):
             "categoria": categoria.value,
             "status": "Pendente",
         }
-        # Aqui você pode salvar a conta no banco de dados
-        print("Nova conta:", nova_conta)
-        page.snack_bar = ft.SnackBar(
-            ft.Text("Conta adicionada com sucesso!"),
-            bgcolor=ft.colors.GREEN,
-        )
-        page.snack_bar.open = True
+
+        # Salvar a conta no banco de dados
+        conn = sqlite3.connect('sistema_contabil.db')
+        cursor = conn.cursor()
+        cursor.execute('''
+        INSERT INTO contas_pagar (id_empresa, descricao, valor, data_vencimento, categoria, status)
+        VALUES (?, ?, ?, ?, ?, ?)
+        ''', (
+            nova_conta["id_empresa"],
+            nova_conta["descricao"],
+            nova_conta["valor"],
+            nova_conta["data_vencimento"],
+            nova_conta["categoria"],
+            nova_conta["status"],
+        ))
+        conn.commit()
+        conn.close()
+
+        # Abrir o diálogo de sucesso
+        abrir_dialog_sucesso()
+
+        # Zerar os campos do formulário
+        descricao.value = ""
+        valor.value = ""
+        data_vencimento.value = ""
+        categoria.value = ""
         page.update()
 
     # Campos do formulário
@@ -103,7 +157,6 @@ def contas_pagar_view(page: ft.Page):
 
     # Layout da página
     page.add(
-       
         ft.Column(
             [
                 ft.Text("Contas a Pagar", size=30, weight=ft.FontWeight.BOLD, color=ft.colors.BLUE),
@@ -120,7 +173,6 @@ def contas_pagar_view(page: ft.Page):
                     content=ft.Container(
                         content=ft.Column(
                             [
-                               
                                 descricao,
                                 valor,
                                 data_vencimento,
