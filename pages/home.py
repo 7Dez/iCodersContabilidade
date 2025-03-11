@@ -5,7 +5,7 @@ from contas_pagar import contas_pagar_view
 from contas_receber import contas_receber_view
 
 
-# Função para a página inicial (Home)
+# Função para a página inicial (Home)   
 def home_view(page: ft.Page):
     page.title = "Home - Sistema Contábil"
     page.vertical_alignment = ft.MainAxisAlignment.CENTER
