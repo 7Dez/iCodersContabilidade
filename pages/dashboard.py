@@ -11,6 +11,24 @@ def dashboard_view(page: ft.Page):
     # Variável para armazenar a empresa selecionada
     empresa_selecionada = None
 
+    # Função para calcular o total das contas a pagar
+    def calcular_total_contas_pagar():
+        conn = sqlite3.connect('sistema_contabil.db')
+        cursor = conn.cursor()
+        cursor.execute("SELECT SUM(valor) FROM contas_pagar")
+        total = cursor.fetchone()[0] or 0  # Se não houver registros, retorna 0
+        conn.close()
+        return total
+
+    # Função para calcular o total das contas a receber
+    def calcular_total_contas_receber():
+        conn = sqlite3.connect('sistema_contabil.db')
+        cursor = conn.cursor()
+        cursor.execute("SELECT SUM(valor) FROM contas_receber")
+        total = cursor.fetchone()[0] or 0  # Se não houver registros, retorna 0
+        conn.close()
+        return total
+
     # Função chamada quando uma empresa é selecionada
     def on_select_empresa(empresa):
         nonlocal empresa_selecionada
@@ -30,6 +48,22 @@ def dashboard_view(page: ft.Page):
             container_empresa.content.controls[3].value = f"Telefone: {dados_empresa[3]}"  # Telefone
             container_empresa.content.controls[4].value = f"Endereço: {dados_empresa[2]}"  # Endereço
 
+            # Atualizar o valor das contas a pagar
+            total_contas_pagar = calcular_total_contas_pagar()
+            contas_pagar.content.controls[1].value = f"R$ {total_contas_pagar:,.2f}"
+
+            # Atualizar o valor das contas a receber
+            total_contas_receber = calcular_total_contas_receber()
+            contas_receber.content.controls[1].value = f"R$ {total_contas_receber:,.2f}"
+
+            saldo_atual.content.controls[1].value = f"R$ {total_contas_receber - total_contas_pagar:,.2f}"
+            if total_contas_receber > total_contas_pagar:
+                saldo_atual.content.controls[1].color = ft.colors.GREEN_700
+            else:
+                saldo_atual.content.controls[1].color = ft.colors.RED_700
+            
+
+            
             # Mostrar mensagem de sucesso
             page.snack_bar = ft.SnackBar(
                 ft.Text(f"Empresa selecionada: {empresa['nome']}"),
@@ -59,7 +93,7 @@ def dashboard_view(page: ft.Page):
         border_radius=15,
         content=ft.Column([
             ft.Text("Saldo Atual", weight=ft.FontWeight.BOLD, color=ft.colors.BLUE_800),
-            ft.Text("R$ 5.000,00", size=20, weight=ft.FontWeight.BOLD, color=ft.colors.GREEN_700)
+            ft.Text("R$ 0,00", size=20, weight=ft.FontWeight.BOLD, color=ft.colors.GREEN_700)
         ], alignment=ft.MainAxisAlignment.CENTER, horizontal_alignment=ft.CrossAxisAlignment.CENTER),
         width=200,
         height=100,
@@ -71,7 +105,7 @@ def dashboard_view(page: ft.Page):
         border_radius=15,
         content=ft.Column([
             ft.Text("Contas a Pagar", weight=ft.FontWeight.BOLD, color=ft.colors.BLUE_800),
-            ft.Text("R$ 1.200,00", size=20, weight=ft.FontWeight.BOLD, color=ft.colors.RED_700)
+            ft.Text("R$ 0,00", size=20, weight=ft.FontWeight.BOLD, color=ft.colors.RED_700)
         ], alignment=ft.MainAxisAlignment.CENTER, horizontal_alignment=ft.CrossAxisAlignment.CENTER),
         width=200,
         height=100,
@@ -83,7 +117,7 @@ def dashboard_view(page: ft.Page):
         border_radius=15,
         content=ft.Column([
             ft.Text("Contas a Receber", weight=ft.FontWeight.BOLD, color=ft.colors.BLUE_800),
-            ft.Text("R$ 1.200,00", size=20, weight=ft.FontWeight.BOLD, color=ft.colors.GREEN_700)
+            ft.Text("R$ 0,00", size=20, weight=ft.FontWeight.BOLD, color=ft.colors.GREEN_700)
         ], alignment=ft.MainAxisAlignment.CENTER, horizontal_alignment=ft.CrossAxisAlignment.CENTER),
         width=200,
         height=100,
